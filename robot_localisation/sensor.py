@@ -32,6 +32,9 @@ class Sensor():
         pass
 
     def get_position(self, robot):
+        # todo: maybe rewrite as a generator, on each iteration
+        # asking robot to move one step or should that be the
+        # responsibility of the caller?
         """
         Return approximate location of the robot.
         """
