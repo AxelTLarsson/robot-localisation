@@ -13,15 +13,18 @@ class ObservationModel:
 class FilterState:
     def __init__(self, n: int, transition: np.ndarray):
         """
-
         :param n: number of states
+        :param transition: the transition matrix
         """
-        self.n = n  # do we need to keep this??
+        self.n = n
 
-        # initialise the belief matrix
+        # initialise the belief matrix, we assume a uniform distribution
+        # across all possible states (NB access to the belief matrix is done
+        # via self.belief_matrix from now on and is normalised upon assignment,
+        # see belief_matrix.setter)
         self._belief_matrix = np.ones(shape=(n,)) / n
 
-        # store a reference to the transition matrix
+        # store a reference to the transpose of the transition matrix
         self.t_T = transition.T
     
     @property
