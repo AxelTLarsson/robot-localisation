@@ -75,6 +75,9 @@ if __name__ == '__main__':
 
     filter = FilterState(n=2, transition=trans)
 
+    print("Transition matrix:")
+    print(trans)
+
     # print initial values
     print(filter.belief_matrix)
     print(filter.belief_state)
