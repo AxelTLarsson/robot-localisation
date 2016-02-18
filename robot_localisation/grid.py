@@ -103,6 +103,6 @@ def combine_directional_transition_models(n, e, s, w):
 
 if __name__ == '__main__':
     # model = build_transition_model(2, 2)
-    model = build_directional_transition_model(2, 2, 'N')
+    model = build_directional_transition_model(2, 2, 'W')
     print(model)
     print(np.sum(model, axis=1))
