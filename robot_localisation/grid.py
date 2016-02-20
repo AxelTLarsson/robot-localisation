@@ -27,8 +27,16 @@ class Grid:
 def build_transition_model(height, width):
     n = height * width * 4
     model = np.zeros((n, n))
+    edges = dict()
 
     for i in range(n):  # let i be the current state
+        # edge detection
+        edges["up"] = i < width
+        edges["down"] = i >= (height - 1) * width
+        edges["left"] = i % width == 0
+        edges["right"] = (i + 1) % width == 0
+        n_edges = sum(edges.values())
+
         for j in range(n):  # let j be the transition state
             if i == j:
                 pass
@@ -97,8 +105,11 @@ def combine_directional_transition_models(n, e, s, w):
     :param w:
     :return: combined model
     """
+    shape = n.shape[0]*4, n.shape[1]*4
+    model = np.array([i for i in zip(n.flat, e.flat, s.flat, w.flat)])
+    # model.reshape(shape)
 
-    pass
+    return model
 
 
 if __name__ == '__main__':
@@ -106,3 +117,12 @@ if __name__ == '__main__':
     model = build_directional_transition_model(2, 2, 'W')
     print(model)
     print(np.sum(model, axis=1))
+
+    n = build_directional_transition_model(2, 2, 'N')
+    e = build_directional_transition_model(2, 2, 'E')
+    s = build_directional_transition_model(2, 2, 'S')
+    w = build_directional_transition_model(2, 2, 'W')
+
+    model = combine_directional_transition_models(n, e, s, w)
+    print(model.shape)
+    print(model)
