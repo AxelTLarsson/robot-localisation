@@ -1,7 +1,8 @@
 import numpy as np
+from enum import IntEnum
 
 
-class Heading:
+class Heading(IntEnum):
     NORTH = 0
     EAST = 1
     SOUTH = 2
@@ -33,7 +34,13 @@ def build_transition_matrix(height, width):
     trans = [0, 0, 0, 0]
     row_length = 4 * width
 
-    headings = [Heading.NORTH, Heading.SOUTH, Heading.EAST, Heading.WEST]
+    headings = [Heading.NORTH, Heading.EAST, Heading.SOUTH, Heading.WEST]
+    relative_headings = (  # represents the relations between two headings
+        -1, 3,  # clockwise
+        -2, 2,  # opposite
+        -3, 1   # anticlockwise
+    )
+
     i = 0
 
     while i < n:  # let i be the current state
@@ -65,107 +72,19 @@ def build_transition_matrix(height, width):
             if i_heading == j_heading and trans[i_heading]:
                 model[i, j] = 0.7
                 # j += row_length - (j % row_length)  # skip the rest of the row
-                # continue
-            if i_heading == Heading.NORTH:
-                if i_heading - j_heading == -1 and trans[Heading.EAST]:
-                    # going from N to E
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == -2 and trans[Heading.SOUTH]:
-                    # going from N to S
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == -3 and trans[Heading.WEST]:
-                    # going from N to W
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-            if i_heading == Heading.EAST:
-                if i_heading - j_heading == 1 and trans[Heading.NORTH]:
-                    # going from E to N
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == -1 and trans[Heading.SOUTH]:
-                    # going from E to S
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == -2 and trans[Heading.WEST]:
-                    # going from N to W
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-            if i_heading == Heading.SOUTH:
-                if i_heading - j_heading == 2 and trans[Heading.NORTH]:
-                    # going from S to N
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == 1 and trans[Heading.EAST]:
-                    # going from S to E
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == -1 and trans[Heading.WEST]:
-                    # going from S to W
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-            if i_heading == Heading.WEST:
-                if i_heading - j_heading == 3 and trans[Heading.NORTH]:
-                    # going from W to N
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == 2 and trans[Heading.EAST]:
-                    # going from W to E
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
-                elif i_heading - j_heading == 1 and trans[Heading.SOUTH]:
-                    # going from W to S
-                    if edges[i_heading]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        # continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        # continue
+                j += 1
+                continue
+
+            for h in headings:
+                if i_heading == h:
+                    if i_heading - j_heading in relative_headings and trans[j_heading]:
+                        if edges[i_heading]:
+                            model[i, j] = 1 / (4 - n_edges)
+                            # continue
+                        else:
+                            model[i, j] = 0.3 / (3 - n_edges)
+                            # continue
+                    break
             j += 1
         i += 1
 
