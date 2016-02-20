@@ -26,7 +26,7 @@ class Grid:
         pass
 
 
-def build_transition_model(height, width):
+def build_transition_matrix(height, width):
     n = height * width * 4
     model = np.zeros((n, n))
     edges = [0, 0, 0, 0]
@@ -64,8 +64,8 @@ def build_transition_model(height, width):
 
             if i_heading == j_heading and trans[i_heading]:
                 model[i, j] = 0.7
-                j += row_length - (j % row_length)  # skip the rest of the row
-                continue
+                # j += row_length - (j % row_length)  # skip the rest of the row
+                # continue
             if i_heading == Heading.NORTH:
                 if i_heading - j_heading == -1 and trans[Heading.EAST]:
                     # going from N to E
@@ -158,7 +158,7 @@ def build_transition_model(height, width):
                     else:
                         model[i, j] = 0.3 / (3 - n_edges)
                         # continue
-                elif i_heading - j_heading == 0 and trans[Heading.SOUTH]:
+                elif i_heading - j_heading == 1 and trans[Heading.SOUTH]:
                     # going from W to S
                     if edges[i_heading]:
                         model[i, j] = 1 / (4 - n_edges)
@@ -242,11 +242,12 @@ if __name__ == '__main__':
     g = Grid(3, 3)
     print(g.id_to_index(28))
 
-    t = build_transition_model(3, 3)
+    t = build_transition_matrix(3, 3)
     s = np.sum(t, axis=1)
     print(t.shape)
     print(s.shape)
-    print(np.hstack((t, s)))
+    print(t)
+    print(s)
 
     # n = build_directional_transition_model(2, 2, 'N')
     # e = build_directional_transition_model(2, 2, 'E')

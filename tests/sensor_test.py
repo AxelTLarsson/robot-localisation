@@ -9,7 +9,7 @@ class SensorTest(TestCase):
         robot = Robot()
         sensor = Sensor()
 
-        print('\n')
+        # print('\n')
         for i in range(10000):
             p = sensor.get_position(robot)
-            print(p)
+            # print(p)
