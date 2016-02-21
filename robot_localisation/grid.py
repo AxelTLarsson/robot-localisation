@@ -1,3 +1,4 @@
+
 import numpy as np
 from enum import IntEnum
 
@@ -11,7 +12,7 @@ class Heading(IntEnum):
 
 class Grid:
 
-    def __init__(self, height=4, width=4):
+    def __init__(self, height, width):
         # the grid itself will be stored as a 3 dimensional array of (x, y, h)
         # where h is the heading referring to the numbers shown in Heading
         self.shape = (height, width)
@@ -32,17 +33,11 @@ def build_transition_matrix(height, width):
     model = np.zeros((n, n))
     edges = [0, 0, 0, 0]
     trans = [0, 0, 0, 0]
-    row_length = 4 * width
+    row_length = 4 * width  # could use this to skip some rows for optimisation
 
     headings = [Heading.NORTH, Heading.EAST, Heading.SOUTH, Heading.WEST]
-    relative_headings = (  # represents the relations between two headings
-        -1, 3,  # clockwise
-        -2, 2,  # opposite
-        -3, 1   # anticlockwise
-    )
 
     i = 0
-
     while i < n:  # let i be the current state
         j = 0
         ip = i // 4  # positional value for i (irrespective of heading)
@@ -77,7 +72,7 @@ def build_transition_matrix(height, width):
 
             for h in headings:
                 if i_heading == h:
-                    if i_heading - j_heading in relative_headings and trans[j_heading]:
+                    if i_heading - j_heading != 0 and trans[j_heading]:
                         if edges[i_heading]:
                             model[i, j] = 1 / (4 - n_edges)
                             # continue
@@ -167,12 +162,3 @@ if __name__ == '__main__':
     print(s.shape)
     print(t)
     print(s)
-
-    # n = build_directional_transition_model(2, 2, 'N')
-    # e = build_directional_transition_model(2, 2, 'E')
-    # s = build_directional_transition_model(2, 2, 'S')
-    # w = build_directional_transition_model(2, 2, 'W')
-    #
-    # model = combine_directional_transition_models(n, e, s, w)
-    # print(model.shape)
-    # print(model)

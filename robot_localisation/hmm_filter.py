@@ -3,11 +3,10 @@ import numpy as np
 
 
 class FilterState:
-    def __init__(self, n: int, transitions: dict):
+    def __init__(self, n: int, transition: np.ndarray):
         """
         :param n: number of states
-        :param transitions: a dictionary of directional transition matrices,
-            this must contain "north", "east", "south", "west"
+        :param transition: the transition matrix
         """
         self.n = n
 
@@ -18,7 +17,7 @@ class FilterState:
         self._belief_matrix = np.ones(shape=(n,)) / n
 
         # store a reference to the transpose of the transition matrix
-        self.transitions = transitions
+        self.t_T = transition.T
 
     @property
     def belief_matrix(self):
@@ -44,30 +43,28 @@ class FilterState:
     def belief_state(self):
         return np.argmax(self.belief_matrix)
 
-    def forward(self, o: np.ndarray, heading: str):
-        self.belief_matrix = o.dot(self.transitions[heading].T
-                                   .dot(self.belief_matrix))
+    def forward(self, o: np.ndarray):
+        self.belief_matrix = o.dot(self.t_T.dot(self.belief_matrix))
 
     def __str__(self):
         return str(self.belief_matrix)
 
 
 if __name__ == '__main__':
-    from robot_localisation import grid
+    from robot_localisation import grid, sensor, robot
 
-    n = grid.build_directional_transition_model(4, 4, 'N')
-    e = grid.build_directional_transition_model(4, 4, 'E')
-    s = grid.build_directional_transition_model(4, 4, 'S')
-    w = grid.build_directional_transition_model(4, 4, 'W')
+    size = (4, 4)
 
-    transitions = {
-        "north": n,
-        "east": e,
-        "south": s,
-        "west": w,
-    }
+    trans_mat = grid.build_transition_matrix(*size)
+    filt = FilterState(n=4*4*4, transition=trans_mat)
+    sens = sensor.Sensor()
+    rob = robot.Robot()
+    grid = grid.Grid(*size)
 
-    f = FilterState(n=4*4*4, transitions=transitions)
+    print(filt.belief_matrix.reshape(size))
 
-
+    for i in range(10):
+        o = sens.get_position(rob)
+        filt.forward(o)
+        print(filt.belief_matrix.reshape(size))
 

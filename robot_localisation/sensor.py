@@ -18,7 +18,7 @@ class Pos(IntEnum):
     nothing = 4
 
 
-class Sensor():
+class Sensor:
 
     """
     The sensor approximates the location of the robot according to:
@@ -29,7 +29,17 @@ class Sensor():
     """
 
     def __init__(self):
-        pass
+        self.surr = [
+            (-1, -1), (-1, 0), (-1, +1), (0, -1), (0, +1),
+            (+1, -1), (+1, 0), (+1, +1)
+        ]
+
+        self.next_surr = [
+            (-2, -2), (-2, -1), (-2,  0), (-2, 1), (-2,  2),
+            (-1, -2), (-1, +2), ( 0, -2), (+0, 2), (+1, -2),
+            (+1, +2), (+2, -2), (+2, -1), (+2, 0), (+2,  1),
+            (+2, +2)
+        ]
 
     def get_position(self, robot):
         # todo: maybe rewrite as a generator, on each iteration
@@ -70,3 +80,35 @@ class Sensor():
                    (x+1, y+2), (x+2, y-2), (x+2, y-1), (x+2, y), (x+2, y+1),
                    (x+2, y+2)]
         return choices[np.random.randint(len(choices))]
+
+    def get_obs_matrix(self, position, grid_shape):
+        if position is None:
+            return None
+
+        mat = np.zeros(grid_shape)
+        x, y = position
+        height, width = grid_shape
+
+        # centre position
+        mat[position] = 0.1
+
+        # first surrounding
+        for a, b in self.surr:
+            if -1 < x+a < width and -1 < y+b < height:
+                mat[x+a, y+b] = 0.05
+
+        # second surrounding
+        for a, b in self.next_surr:
+            if -1 < x+a < width and -1 < y+b < height:
+                mat[x+a, y+b] = 0.025
+
+        return mat
+
+
+if __name__ == '__main__':
+    sens = Sensor()
+    print(sens.get_obs_matrix((3, 3), (10, 10)))
+    print(sens.get_obs_matrix((3, 3), (4, 4)))
+
+
+

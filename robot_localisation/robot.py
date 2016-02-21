@@ -1,4 +1,5 @@
-class Robot():
+
+class Robot:
     """
     Representation of the actual robot.
     """
