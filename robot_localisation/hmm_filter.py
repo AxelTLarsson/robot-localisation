@@ -14,6 +14,7 @@ class FilterState:
         # across all possible states (NB access to the belief matrix is done
         # via self.belief_matrix from now on and is normalised upon assignment,
         # see belief_matrix.setter)
+        # the belief matrix is the "f_{1:t}" at init "f_{1:0}" = P(X_0)
         self._belief_matrix = np.ones(shape=(n,)) / n
 
         # store a reference to the transpose of the transition matrix
@@ -58,8 +59,8 @@ if __name__ == '__main__':
     trans_mat = grid.build_transition_matrix(*size)
     filt = FilterState(n=4*4*4, transition=trans_mat)
     sens = sensor.Sensor()
-    rob = robot.Robot()
     grid = grid.Grid(*size)
+    rob = robot.Robot(grid, trans_mat)
 
     print(filt.belief_matrix.reshape(size))
 

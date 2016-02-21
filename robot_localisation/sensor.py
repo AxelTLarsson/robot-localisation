@@ -5,6 +5,7 @@ This module implements the sensor that tracks the robot.
 import numpy as np
 from numpy.random import random_sample
 from robot_localisation.robot import Robot
+from robot_localisation.grid import *
 from enum import IntEnum
 
 
