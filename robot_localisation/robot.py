@@ -1,11 +1,17 @@
 
+from random import randint
+
+
 class Robot:
     """
     Representation of the actual robot.
     """
 
-    def __init__(self):
-        self.position = 1, 1
+    def __init__(self, grid_shape, position=None):
+        if position is None:
+            self.position = randint(grid_shape[0]), randint(grid_shape[1])
+        else:
+            self.position = position
 
     def get_position(self):
         return self.position

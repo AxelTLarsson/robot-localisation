@@ -85,22 +85,28 @@ class Sensor:
         if position is None:
             return None
 
-        mat = np.zeros(grid_shape)
+        mat = np.zeros(grid_shape, dtype=np.float)
         x, y = position
-        height, width = grid_shape
 
-        # centre position
-        mat[position] = 0.1
+        mat[x-2:x+3, y-2:y+3] = 0.025  # second surrounding
+        mat[x-1:x+2, y-1:y+2] = 0.05  # first surrounding
+        mat[x, y] = 0.1
 
-        # first surrounding
-        for a, b in self.surr:
-            if -1 < x+a < width and -1 < y+b < height:
-                mat[x+a, y+b] = 0.05
+        return mat
 
-        # second surrounding
-        for a, b in self.next_surr:
-            if -1 < x+a < width and -1 < y+b < height:
-                mat[x+a, y+b] = 0.025
+    def get_obs_matrix_quad(self, position, grid_shape):
+        if position is None:
+            return None
+        
+        grid_shape = (grid_shape[0]*4, grid_shape[1]*4)
+        position = (position[0]*4, position[1]*4)
+        
+        mat = np.zeros(grid_shape, dtype=np.float)
+        x, y = position
+
+        mat[max(0, x-8):x+12, max(0, y-8):y+12] = 0.025  # second surrounding
+        mat[max(0, x-4):x+8,  max(0, x-4):y+8] = 0.05  # first surrounding
+        mat[x:x+4, y:y+4] = 0.1
 
         return mat
 
@@ -109,6 +115,10 @@ if __name__ == '__main__':
     sens = Sensor()
     print(sens.get_obs_matrix((3, 3), (10, 10)))
     print(sens.get_obs_matrix((3, 3), (4, 4)))
+
+    np.set_printoptions(linewidth=300)
+    print(sens.get_obs_matrix_quad((3, 3), (4, 4)))
+    print(sens.get_obs_matrix_quad((1, 1), (5, 5)))
 
 
 

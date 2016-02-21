@@ -63,8 +63,9 @@ if __name__ == '__main__':
 
     print(filt.belief_matrix.reshape(size))
 
-    for i in range(10):
-        o = sens.get_position(rob)
-        filt.forward(o)
-        print(filt.belief_matrix.reshape(size))
+    real_pos = rob.get_position()
+    sens_pos = sens.get_position(rob)
+    obs = sens.get_obs_matrix(sens_pos, size)
+    filt.forward(obs)
+    print(filt.belief_matrix.reshape(size))
 
