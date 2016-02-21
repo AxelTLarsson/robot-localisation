@@ -19,13 +19,31 @@ class Grid:
         self._grid = np.zeros((height, width, 4))
         self.states = height * width * 4
 
-    def id_to_index(self, id):
+    def index_to_pose(self, id):
+        """
+        Convert a numerical index to corresponding pose.
+
+        E.g. index_to_pose(5) = (0, 1, North) where North is a Heading
+        """
         return (int((id / 4) // self.shape[1]),  # row
                 int((id / 4) % self.shape[1]),  # column
-                id % 4)  # heading
+                Heading(id % 4))  # heading
 
     def __str__(self):
         pass
+
+    def pose_to_index(self, pose):
+        """
+        Translate a pose of type (x, y, Heading) to a numerical index that can
+        be used with the transition matrix.
+
+        E.g. pose_to_index((0,1,N)) = 5 where N is a Heading
+        """
+        # compute square_nbr as row-major on the grid, first grid is nbr 0
+        cols = self.shape[1]
+        x, y, h = pose
+        square_nbr = x * cols + y
+        return square_nbr * 4 + int(h)
 
 
 def build_transition_matrix(height, width):
@@ -154,7 +172,7 @@ if __name__ == '__main__':
 
     np.set_printoptions(precision=2, threshold=5000, linewidth=300)
     g = Grid(3, 3)
-    print(g.id_to_index(28))
+    print(g.index_to_pose(28))
 
     t = build_transition_matrix(3, 3)
     s = np.sum(t, axis=1)
