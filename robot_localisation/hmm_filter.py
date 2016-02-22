@@ -3,12 +3,12 @@ import numpy as np
 
 
 class FilterState:
-    def __init__(self, n: int, transition: np.ndarray):
+    def __init__(self, transition: np.ndarray):
         """
         :param n: number of states
         :param transition: the transition matrix
         """
-        self.n = n
+        self.n = transition.shape[0]
 
         # initialise the belief matrix, we assume a uniform distribution
         # across all possible states (NB access to the belief matrix is done
