@@ -23,7 +23,7 @@ Valid commands (all commands are case insensitive):
     ENTER                   move the robot one step further in the simulation,
                             will also output current pose and estimated
                             position of the robot
-    go <delay in seconds>   step throgh simulation with the delay specified
+    go <delay in seconds>   step through simulation with the delay specified
     help                    show this help text
     show T                  show the transition matrix T
     show f                  show the filter column vector
@@ -63,23 +63,25 @@ def main():
 
     # Main loop
     while True:
+        obs = the_sensor.get_obs_matrix(sensor_value, size)
         user_command = str(input('> '))
         if user_command.upper() == 'QUIT' or user_command.upper() == 'Q':
             break
         elif user_command.upper() == 'HELP':
             print(help_text())
         elif user_command.upper() == 'SHOW T':
-            print("todo")
+            print(the_T_matrix)
         elif user_command.upper() == 'SHOW F':
-            print("todo")
+            print(the_filter.belief_matrix)
         elif user_command.upper() == 'SHOW O':
-            print("todo")
-        elif not user_command.upper():
+            print(obs)
+        elif not user_command:
+            the_filter.forward(obs)
             the_robot.step()
             print(the_robot)
-            print("The sensor says: {}".format(
-                the_sensor.get_position(the_robot)))
-            print("The HMM filter thinks the robot is at {}".format("fix"))
+            print("The sensor says: {}".format(sensor_value))
+            filter_est = the_grid.index_to_pose(the_filter.belief_state)
+            print("The HMM filter thinks the robot is at {}".format(filter_est))
             print("The Manhattan distance is: {}".format("manhattan"))
 
         else:

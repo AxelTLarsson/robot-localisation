@@ -15,7 +15,7 @@ class FilterState:
         # via self.belief_matrix from now on and is normalised upon assignment,
         # see belief_matrix.setter)
         # the belief matrix is the "f_{1:t}" at init "f_{1:0}" = P(X_0)
-        self._belief_matrix = np.ones(shape=(self.n,)) / self.n
+        self._belief_matrix = (np.ones(shape=(self.n,)) / self.n).reshape((-1, 1))
 
         # store a reference to the transpose of the transition matrix
         self.t_T = transition.T
