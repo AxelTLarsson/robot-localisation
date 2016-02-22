@@ -27,6 +27,7 @@ Valid commands (all commands are case insensitive):
     help                    show this help text
     show T                  show the transition matrix T
     show f                  show the filter column vector
+    show 0                  show the observation matrix
     quit | q                quit the program
 -------------------------------------------------------------------------------
     """
@@ -49,14 +50,17 @@ def main():
     # Initialise the program
     size = (args.rows, args.columns)
     the_T_matrix = build_transition_matrix(*size)
-    the_filter = FilterState(
-        n=args.rows * args.columns * 4, transition=the_T_matrix)
+    the_filter = FilterState(transition=the_T_matrix)
     the_sensor = Sensor()
     the_grid = Grid(*size)
     the_robot = Robot(the_grid, the_T_matrix)
 
     print(help_text())
     print("Grid size is {} x {}".format(size[0], size[1]))
+    print(the_robot)
+    sensor_value = the_sensor.get_position(the_robot)
+    print("The sensor says: {}".format(sensor_value))
+
     # Main loop
     while True:
         user_command = str(input('> '))
@@ -67,6 +71,8 @@ def main():
         elif user_command.upper() == 'SHOW T':
             print("todo")
         elif user_command.upper() == 'SHOW F':
+            print("todo")
+        elif user_command.upper() == 'SHOW O':
             print("todo")
         elif not user_command.upper():
             the_robot.step()
