@@ -83,43 +83,41 @@ class Sensor:
         return choices[np.random.randint(len(choices))]
 
     def get_obs_matrix(self, position, grid_shape):
-        if position is None:
-            return None
-
-        mat = np.zeros(grid_shape, dtype=np.float)
+        n = grid_shape[0] * grid_shape[1] * 4
+        mat = np.zeros((n,))
         x, y = position
 
-        mat[x-2:x+3, y-2:y+3] = 0.025  # second surrounding
-        mat[x-1:x+2, y-1:y+2] = 0.05  # first surrounding
-        mat[x, y] = 0.1
+        # index for facing north in the current position
+        position_index = position_to_north_state(position, grid_shape)
+        mat[position_index:position_index+4] = 0.1
 
-        return mat
+        for o in self.next_surr:
+            x_, y_ = x + o[0], y + o[1]
+            if 0 <= x_ < grid_shape[0] and 0 <= y_ < grid_shape[1]:
+                o_index = position_to_north_state((x_, y_), grid_shape)
+                mat[o_index:o_index+4] = 0.025
 
-    def get_obs_matrix_quad(self, position, grid_shape):
-        if position is None:
-            return None
-        
-        grid_shape = (grid_shape[0]*4, grid_shape[1]*4)
-        position = (position[0]*4, position[1]*4)
-        
-        mat = np.zeros(grid_shape, dtype=np.float)
-        x, y = position
+        for o in self.surr:
+            x_, y_ = x + o[0], y + o[1]
+            if 0 <= x_ < grid_shape[0] and 0 <= y_ < grid_shape[1]:
+                o_index = position_to_north_state((x_, y_), grid_shape)
+                mat[o_index:o_index+4] = 0.05
 
-        mat[max(0, x-8):x+12, max(0, y-8):y+12] = 0.025  # second surrounding
-        mat[max(0, x-4):x+8,  max(0, x-4):y+8] = 0.05  # first surrounding
-        mat[x:x+4, y:y+4] = 0.1
+        return np.diag(mat)
 
-        return mat
+
+def position_to_north_state(position, grid_shape):
+    return (position[0] * grid_shape[1] + position[1]) * 4
 
 
 if __name__ == '__main__':
-    sens = Sensor()
-    print(sens.get_obs_matrix((3, 3), (10, 10)))
-    print(sens.get_obs_matrix((3, 3), (4, 4)))
+    trans = build_transition_matrix(3, 3)
 
-    np.set_printoptions(linewidth=300)
-    print(sens.get_obs_matrix_quad((3, 3), (4, 4)))
-    print(sens.get_obs_matrix_quad((1, 1), (5, 5)))
+    np.set_printoptions(linewidth=1000, threshold=10000)
+    sens = Sensor()
+    obs = sens.get_obs_matrix((1, 1), (2, 2))
+
+    print(np.diag(obs))
 
 
 

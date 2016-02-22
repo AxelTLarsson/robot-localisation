@@ -52,21 +52,4 @@ class FilterState:
 
 
 if __name__ == '__main__':
-    from robot_localisation import grid, sensor, robot
-
-    size = (4, 4)
-
-    trans_mat = grid.build_transition_matrix(*size)
-    filt = FilterState(n=4*4*4, transition=trans_mat)
-    sens = sensor.Sensor()
-    grid = grid.Grid(*size)
-    rob = robot.Robot(grid, trans_mat)
-
-    print(filt.belief_matrix.reshape(size))
-
-    real_pos = rob.get_position()
-    sens_pos = sens.get_position(rob)
-    obs = sens.get_obs_matrix(sens_pos, size)
-    filt.forward(obs)
-    print(filt.belief_matrix.reshape(size))
-
+    pass

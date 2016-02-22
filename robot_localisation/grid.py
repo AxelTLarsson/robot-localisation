@@ -104,77 +104,13 @@ def build_transition_matrix(height, width):
     return model
 
 
-def build_directional_transition_model(height, width, orientation):
-    n = height * width
-    model = np.zeros((n, n))
-    edges = dict()
-    trans = dict()
-
-    sp = {  # dictionary denoting special connections between
-            # orientations and directions
-        'N': 'up',
-        'S': 'down',
-        'E': 'right',
-        'W': 'left'
-    }
-
-    for i in range(n):  # i = current state
-
-        # edge detection
-        edges["up"] = i < width
-        edges["down"] = i >= (height - 1) * width
-        edges["left"] = i % width == 0
-        edges["right"] = (i + 1) % width == 0
-        n_edges = sum(edges.values())
-
-        for j in range(n):  # j = transition state
-            
-            if i == j:
-                continue
-            
-            trans["up"] = (i - j) / width == 1
-            trans["down"] = (i - j) / width == -1
-            trans["left"] = (i - j) == 1 and i % width != 0
-            trans["right"] = (i - j) == -1 and (i + 1) % width != 0
-
-            for o, m in sp.items():
-                if trans[m]:
-                    if orientation == o:
-                        model[i, j] = 0.7
-                        continue
-                    elif edges[sp[orientation]]:
-                        model[i, j] = 1 / (4 - n_edges)
-                        continue
-                    else:
-                        model[i, j] = 0.3 / (3 - n_edges)
-                        continue
-
-    return model
-
-
-def combine_directional_transition_models(n, e, s, w):
-    """
-
-    :param n:
-    :param e:
-    :param s:
-    :param w:
-    :return: combined model
-    """
-    shape = n.shape[0]*4, n.shape[1]*4
-    model = np.array([i for i in zip(n.flat, e.flat, s.flat, w.flat)])
-    # model.reshape(shape)
-
-    return model
-
-
 if __name__ == '__main__':
 
     np.set_printoptions(precision=2, threshold=5000, linewidth=300)
     g = Grid(3, 3)
     print(g.index_to_pose(28))
 
-    t = build_transition_matrix(3, 3)
+    t = build_transition_matrix(4, 4)
     s = np.sum(t, axis=1)
     print(t.shape)
     print(s.shape)
