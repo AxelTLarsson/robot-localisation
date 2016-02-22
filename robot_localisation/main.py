@@ -82,7 +82,7 @@ def main():
         elif user_command.upper() == 'SHOW O':
             print(obs)
         elif not user_command:
-            # approximate and take the step etc.
+            # take a step then approximate etc.
             the_robot.step()
             sensor_value = the_sensor.get_position(the_robot)
             obs = the_sensor.get_obs_matrix(sensor_value, size)
@@ -108,5 +108,69 @@ def manhattan(pos1, pos2):
     x2, y2 = pos2
     return abs(x1-x2) + abs(y1-y2)
 
+
+def automated_run():
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure(figsize=(10, 7))
+    navg = 20
+    nsteps = 10
+
+    for size in (2, 2), (3, 3), (4, 4), (5, 5), (10, 10):
+
+        avg_distances = np.zeros(shape=(nsteps+1,))
+
+        for n in range(navg):
+
+            distances = list()
+            none_values = list()
+
+            the_T_matrix = build_transition_matrix(*size)
+            the_filter = FilterState(transition=the_T_matrix)
+            the_sensor = Sensor()
+            the_grid = Grid(*size)
+            the_robot = Robot(the_grid, the_T_matrix)
+
+            # get the manhattan distance at the start
+            filter_est = the_grid.index_to_pose(the_filter.belief_state)
+            pos_est = (filter_est[0], filter_est[1])
+            distances.append(manhattan(the_robot.get_position(), pos_est))
+
+            for i in range(nsteps):
+
+                # take a step then approximate etc.
+                the_robot.step()
+                sensor_value = the_sensor.get_position(the_robot)
+                if sensor_value is None:
+                    none_values.append(i)  # keep track of where None was returned
+
+                obs = the_sensor.get_obs_matrix(sensor_value, size)
+                the_filter.forward(obs)
+
+                filter_est = the_grid.index_to_pose(the_filter.belief_state)
+                pos_est = (filter_est[0], filter_est[1])
+                distances.append(manhattan(the_robot.get_position(), pos_est))
+
+            avg_distances += np.array(distances)
+
+        avg_distances /= navg
+        base_line, = plt.plot(avg_distances, label="Grid size {}".format(size))
+
+        # for point in none_values:
+        #     plt.scatter(point, distances[point], marker='o',
+        #                 color=base_line.get_color(), s=40)
+
+    plt.legend()
+    plt.xlim(0, nsteps)
+    plt.ylim(0,)
+    plt.ylabel("Manhattan distance")
+    plt.xlabel("Steps")
+    plt.title("Manhattan distance from true position and inferred position \n"
+              "from the hidden Markov model (average over %s runs)" % navg)
+    fig.savefig("automated_run.png")
+    plt.show()
+
+
 if __name__ == '__main__':
     main()
+    # automated_run()
