@@ -31,7 +31,8 @@ Valid commands (all commands are case insensitive):
 -------------------------------------------------------------------------------
     """
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(description='Robot localisation with HMM')
     parser.add_argument(
         '-r', '--rows',
@@ -53,7 +54,6 @@ if __name__ == '__main__':
     the_sensor = Sensor()
     the_grid = Grid(*size)
     the_robot = Robot(the_grid, the_T_matrix)
-    
 
     print(help_text())
     print("Grid size is {} x {}".format(size[0], size[1]))
@@ -79,3 +79,6 @@ if __name__ == '__main__':
         else:
             print("Unknown command!")
 
+
+if __name__ == '__main__':
+    main()
