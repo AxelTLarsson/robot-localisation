@@ -18,7 +18,7 @@ class SensorTest(TestCase):
         # print('\n')
         for i in range(10000):
             p = sensor.get_position(robot)
-            # print(p)
+            #print(p)
 
     def test_get_obs_matrix_with_4x4(self):
         sens = Sensor()
