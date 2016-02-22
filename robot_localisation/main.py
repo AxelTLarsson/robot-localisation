@@ -23,11 +23,10 @@ Valid commands (all commands are case insensitive):
     ENTER                   move the robot one step further in the simulation,
                             will also output current pose and estimated
                             position of the robot
-    go <delay in seconds>   step through simulation with the delay specified
     help                    show this help text
     show T                  show the transition matrix T
     show f                  show the filter column vector
-    show 0                  show the observation matrix
+    show O                  show the observation matrix
     quit | q                quit the program
 -------------------------------------------------------------------------------
     """
