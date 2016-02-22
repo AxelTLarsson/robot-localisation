@@ -4,6 +4,7 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from unittest import TestCase
+import unittest
 from robot_localisation import grid, robot
 from robot_localisation.grid import Heading
 import numpy as np
@@ -112,3 +113,6 @@ class SensorTest(TestCase):
             0.05, 0.05, 0.05, 0.05,  # square (1, 1)
         ])
         self.assertEqual(np.sum(obs_vec - ans), 0)
+
+if __name__ == '__main__':
+    unittest.main()
