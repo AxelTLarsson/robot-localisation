@@ -1,7 +1,12 @@
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 from robot_localisation import grid
 from unittest import TestCase
+import unittest
 
 
 class TestGrid(TestCase):
@@ -36,5 +41,7 @@ class TestGrid(TestCase):
         self.assertAlmostEqual(t[13, 0], 0.15)
         self.assertAlmostEqual(t[13, 26], 0.15)
 
-
         self.assertAlmostEqual(np.sum(t), 36)
+
+if __name__ == '__main__':
+    unittest.main()
