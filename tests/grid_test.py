@@ -1,3 +1,7 @@
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 from robot_localisation import grid
