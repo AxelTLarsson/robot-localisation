@@ -69,7 +69,7 @@ The objective is to localise and track a robot whose location is hidden. The onl
 \subsection{Probabilistic Reasoning}
 We construct an agent operating in a partially observable environment. This agent maintains a belief state of which states of the world are currently probable. The agent predicts from the belief state and a transition model how the world might evolve in the next time step. The agent receives percepts from a noisy sensor and updates its belief state with the help of a sensor model.
 
-A transition model specifies the probability distribution over the latest state variables given the previous values. In general we denote this variable $X_t$ where $t$ is the time step. So, $X_0$ would denote the state of the world at $t = 0$. In our world the state variable is the pose of the robot. If we assume a first-order Markov process, i.e. that the current state depends on only on the previous state, we can write: 
+A transition model specifies the probability distribution over the latest state variables given the previous values. In general we denote this variable $X_t$ where $t$ is the time step. So, $X_0$ would denote the state of the world at $t = 0$. In our world the state variable is the pose of the robot. If we assume a first-order Markov process, i.e. that the current state depends on only the previous state, we can write: 
 \begin{displaymath}
 \textbf{P}(\textbf{X}_t \mid \textbf{X}_{0:t-1}) = \textbf{P}(\textbf{X}_t \mid \textbf{X}_{t-1})
 \end{displaymath} Where $\textbf{X}_t$ are the state variables. Hence, the transition model says that the next state is only dependent on the previous state.
@@ -110,13 +110,51 @@ The possible different states are given as poses, i.e. $(x,y,heading)$. They nee
 \end{table}
 We then multiply the heading code with $4$ and add the encoding of the location $(x,y)$ as a simply enumeration of the fields as row-major order. Thus we have:
 \begin{lstlisting}
-pose_to_index(x,y,h) = sq_nbr(x,y) + heading_code(h) * 4
-\end{lstlisting} to compute the index of a certain pose. For instance the pose $(0,1,EAST)$ would be translated to $1 + 1*4 = 5$, which corresponds to the robot pose shown in Figure \ref{fig:grid} and the pose $(0,0,EAST)$ would be equal to $1$. So to find the probability of going from pose (i.e. state) $(0,0,EAST)$ to $(0,1,EAST)$ we look up the transition matrix cell $\textbf{T}_{1, 5}$ which should be equal to $0.7$ according to Table \ref{tab:headings}.
+pose_to_index(x,y,h) = sq_nbr(x,y) * 4 + heading_code(h)
+\end{lstlisting} to compute the index of a certain pose. For instance the pose $(0,1,EAST)$ would be translated to $1*4 + 1 = 5$, which corresponds to the robot pose shown in Figure \ref{fig:grid} and the pose $(0,0,EAST)$ would be equal to $1$. So to find the probability of going from pose (i.e. state) $(0,0,EAST)$ to $(0,1,EAST)$ we look up the transition matrix cell $\textbf{T}_{1, 5}$ which should be equal to $0.7$ according to Table \ref{tab:headings}.
 
 \textbf{TODO}: Explain the sensor matrix!
 
 \section{Implementation}
- Additionally there should be one section on the implementation, where to find and how to run it.
+The program is written in Python3.
+
+\subsection{Usage}
+The program root is to be found at \texttt{/h/d5/f/dat11al1/robot-localisation}, while standing in that directory, execute \texttt{python3 robot\_localisation -h} to get a useful help message as such:
+\begin{lstlisting}
+usage: robot_localisation [-h] [-r ROWS] [-c COLUMNS]
+
+Robot localisation with HMM
+
+optional arguments:
+  -h, --help                     show this help message
+                                 and exit
+  -r ROWS, --rows ROWS           the number of rows on
+                                 the grid, default is 4
+  -c COLUMNS, --columns COLUMNS  the number of columns on
+                                 the grid, default is 4
+\end{lstlisting}
+As can be seen above, the \texttt{--rows} and \texttt{--cols} command line arguments are used to specify the desired grid size.
+
+\subsection{Requirements}
+The minimum requirements to execute the program is:
+
+\begin{itemize}
+    \item Python3
+    \item numpy
+\end{itemize}
+If \texttt{virtualenv}, \texttt{setuptools} and \texttt{pip} is available on the system (which, unfortunately, they are not on the student computer system), these can be used to install the program in a virtual environment, but this is entirely optional.
+
+\subsection{Running the Program}
+While standing in the project root (\texttt{/h/d5/f/dat11al1/robot-localisation}) with a terminal, execute the command \texttt{python3 robot\_localisation}.
+
+The program is developed as a CLI - Command Line Interface. Upon execution, the program outputs a friendly help text of how to run it, this message can at any time be displayed by typing \texttt{help}. The simulation starts at $t = 0$ and to step forward, one simply presses enter on the keyboard.
+
+The transition and observation matrices can at any time be displayed by invoking \texttt{show T} and \texttt{show O}, respectively. Similarly the column vector representing the belief state of the agent can be shown by \texttt{show f}.
+
+To quit, enter \texttt{q}.
+
+\subsection{Testing}
+There are three test modules; \texttt{grid\_test}, \texttt{manhattan\_text} and \texttt{robot\_test}, all located in the \texttt{tests} directory. To execute any of them, make sure the current working directory is the project root (\texttt{/h/d5/f/dat11al1/robot-localisation}) and type \texttt{python3 tests/<test-module>.py}.
  
 \section{Results}
 
