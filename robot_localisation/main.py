@@ -4,6 +4,7 @@ This module contains the logic to run the simulation.
 import sys
 import os
 import argparse
+import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from robot_localisation.grid import Grid, build_transition_matrix
 from robot_localisation.robot import Robot, Sensor
@@ -53,16 +54,22 @@ def main():
     the_sensor = Sensor()
     the_grid = Grid(*size)
     the_robot = Robot(the_grid, the_T_matrix)
+    sensor_value = None
+    obs = None
 
     print(help_text())
     print("Grid size is {} x {}".format(size[0], size[1]))
     print(the_robot)
-    sensor_value = the_sensor.get_position(the_robot)
     print("The sensor says: {}".format(sensor_value))
+    filter_est = the_grid.index_to_pose(the_filter.belief_state)
+    pos_est = (filter_est[0], filter_est[1])
+    print("The HMM filter thinks the robot is at {}".format(filter_est))
+    print("The Manhattan distance is: {}".format(
+        manhattan(the_robot.get_position(), pos_est)))
+    np.set_printoptions(linewidth=1000)
 
     # Main loop
     while True:
-        obs = the_sensor.get_obs_matrix(sensor_value, size)
         user_command = str(input('> '))
         if user_command.upper() == 'QUIT' or user_command.upper() == 'Q':
             break
@@ -75,14 +82,19 @@ def main():
         elif user_command.upper() == 'SHOW O':
             print(obs)
         elif not user_command:
-            the_filter.forward(obs)
+            # approximate and take the step etc.
             the_robot.step()
+            sensor_value = the_sensor.get_position(the_robot)
+            obs = the_sensor.get_obs_matrix(sensor_value, size)
+            the_filter.forward(obs)
+
             print(the_robot)
             print("The sensor says: {}".format(sensor_value))
             filter_est = the_grid.index_to_pose(the_filter.belief_state)
+            pos_est = (filter_est[0], filter_est[1])
             print("The HMM filter thinks the robot is at {}".format(filter_est))
             print("The Manhattan distance is: {}".format(
-                manhattan(the_robot.get_position(), sensor_value)))
+                manhattan(the_robot.get_position(), pos_est)))
 
         else:
             print("Unknown command!")

@@ -149,8 +149,9 @@ class Sensor:
         x, y = position
 
         # index for facing north in the current position
-        position_index = position_to_north_state(position, grid_shape)
-        mat[position_index:position_index+4] = 0.1
+        if 0 <= x < grid_shape[0] and 0 <= y < grid_shape[1]:
+            position_index = position_to_north_state(position, grid_shape)
+            mat[position_index:position_index+4] = 0.1
 
         for o in self.next_surr:
             x_, y_ = x + o[0], y + o[1]
@@ -170,3 +171,9 @@ class Sensor:
 def position_to_north_state(position, grid_shape):
     return (position[0] * grid_shape[1] + position[1]) * 4
 
+
+if __name__ == '__main__':
+    np.set_printoptions(linewidth=1000)
+    sens = Sensor()
+    obs = sens.get_obs_matrix((3, 3), (2, 2))
+    print(obs)

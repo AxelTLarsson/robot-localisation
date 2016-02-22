@@ -9,6 +9,7 @@ class FilterState:
         :param transition: the transition matrix
         """
         self.n = transition.shape[0]
+        self.num_steps = 0
 
         # initialise the belief matrix, we assume a uniform distribution
         # across all possible states (NB access to the belief matrix is done
@@ -45,7 +46,9 @@ class FilterState:
         return np.argmax(self.belief_matrix)
 
     def forward(self, o: np.ndarray):
-        self.belief_matrix = o.dot(self.t_T.dot(self.belief_matrix))
+        self.num_steps += 1
+        if o is not None:
+            self.belief_matrix = o.dot(self.t_T.dot(self.belief_matrix))
 
     def __str__(self):
         return str(self.belief_matrix)
