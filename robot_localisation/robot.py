@@ -37,7 +37,7 @@ class Robot:
         return self.pose
 
     def __str__(self):
-        return "I am a robot at {}".format(str(self.pose))
+        return "The robot is at: {}".format(str(self.pose))
 
     def step(self):
         """
