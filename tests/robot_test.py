@@ -1,5 +1,5 @@
 from unittest import TestCase
-from robot_localisation import grid, robot, sensor
+from robot_localisation import grid, robot
 from robot_localisation.grid import Heading
 import numpy as np
 
@@ -75,7 +75,7 @@ class SensorTest(TestCase):
 
         # print('\n')
         for i in range(10000):
-            p = sens.get_position(robot)
+            p = sens.get_position(rob)
             # print(p)
 
     def test_get_obs_matrix_with_4x4(self):
