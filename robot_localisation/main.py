@@ -6,8 +6,7 @@ import os
 import argparse
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from robot_localisation.grid import Grid, build_transition_matrix
-from robot_localisation.sensor import Sensor
-from robot_localisation.robot import Robot
+from robot_localisation.robot import Robot, Sensor
 from robot_localisation.hmm_filter import FilterState
 
 
@@ -82,11 +81,20 @@ def main():
             print("The sensor says: {}".format(sensor_value))
             filter_est = the_grid.index_to_pose(the_filter.belief_state)
             print("The HMM filter thinks the robot is at {}".format(filter_est))
-            print("The Manhattan distance is: {}".format("manhattan"))
+            print("The Manhattan distance is: {}".format(
+                manhattan(the_robot.get_position(), sensor_value)))
 
         else:
             print("Unknown command!")
 
+
+def manhattan(pos1, pos2):
+    """
+    Calculate the Manhattan distance between pos1 and pos2.
+    """
+    x1, y1 = pos1
+    x2, y2 = pos2
+    return abs(x1-x2) + abs(y1-y2)
 
 if __name__ == '__main__':
     main()
