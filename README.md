@@ -14,4 +14,4 @@ Robot localisation based on a Hidden Markov Model.
 `python setup.py test`
 
 ## Documentation
-Refer to [doc/report.pdf](./doc/report.pdf) (not yet written).
+Refer to [doc/report.pdf](./doc/report.pdf).
