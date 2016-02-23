@@ -10,6 +10,7 @@
 \usepackage{graphicx}
 \usepackage{mathtools}
 \usepackage[thinlines]{easytable}
+\usepackage{placeins}
 
 \begin{document}
 
@@ -34,7 +35,7 @@ The environment is modelled as an empty room; a rectangular grid of size $n \tim
 
 
 
-\subsection{Robot and Sensors}
+\subsection{Robot and Sensors}\label{sec:robots}
 The robot moves autonomously in one of the four cardinal directions, denoted $NORTH$, $EAST$, $SOUTH$ and $WEST$ depending on whether or not it encounters a wall. The moving strategy is given in Table \ref{tab:robot}. If the robot encounters a wall it always changes heading and the new heading is chosen from a uniform distribution over the available headings that does not entail wall encounters. Thus, if the robot is in the north west corner there is a $50\%$ probability of the new heading being east and a $50\%$ probability of it being south.
 \begin{table}[ht]
 \centering
@@ -80,7 +81,7 @@ Furthermore we denote the evidence variable as $E_t$ which corresponds to the se
 
 Filtering is the process of computing the belief state, the posterior distribution over the most recent state given all evidence to date. To do filtering we compute:
 \begin{displaymath}
-\textbf{P}(\textbf{X}_t \mid \textbf{e}_{1:t})
+\textbf{f}_{1:t} = \textbf{P}(\textbf{X}_t \mid \textbf{e}_{1:t})
 \end{displaymath}
 
 A \textbf{hidden Markov model}, or \textbf{HMM} is a temporal probabilistic model in which the state of the world is described by a \textbf{single discrete} random variable and whose possible values are the possible states of the world. If we enumerate the different possible states, i.e. the values of $X_t$, with $1,..,S$ the transition model $\textbf{P}(X_t \mid X_{t-1})$ becomes an $S \times S$ matrix $\textbf{T}$. $\textbf{T}_{i,j}$ is the probability of a transition from state $i$ to state $j$ which can be written as 
@@ -90,7 +91,11 @@ A \textbf{hidden Markov model}, or \textbf{HMM} is a temporal probabilistic mode
 
 We also introduce an $S \times S$ diagonal matrix $\textbf{O}_t$ whose $i$:th diagonal entry is $P(e_t \mid X_t = i)$, i.e. we specify how likely it is that the state causes $e_t$ to appear, for each state $i$. The $t$ specifies the time step and thus the current evidence is known at that time.
 
-\textbf{TODO}: describe FORWARD step and recursive estimation as well as the prior probability distribution at time 0, $\textbf{P}(\textbf{X}_0)$.
+With a hidden Markov model we can do filtering with the following equation:
+\begin{displaymath}
+\textbf{f}_{1:t+1} = \alpha \textbf{O}_{t+1} \textbf{T}^t\textbf{f}_{1:t}
+\end{displaymath}
+where \textbf{f} is a column vector over the belief state; the probability distribution over the most recent state given all evidence to date. The equation is recursive, and we set the initial $\textbf{f}_{1:0}= \textbf{P}(\textbf{X}_0)$ to reflect the fact that at the the start of the process, $t=0$, all states are equally likely since we have not been given any evidence at this time.
 
 \section{Method}
 The possible different states are given as poses, i.e. $(x,y,heading)$. They need to be encoded in the transition matrix $\textbf{T}$ so that $\textbf{T}_{i,j}$ gives the probability of the robot transitioning to pose $j$ from pose $i$. We translate a pose to an index $i$ or $j$ by enumerating the headings clockwise from $0$ to $4$ starting with $NORTH$. This is described in Table \ref{tab:headings}.
@@ -113,10 +118,23 @@ We then multiply the heading code with $4$ and add the encoding of the location 
 pose_to_index(x,y,h) = sq_nbr(x,y) * 4 + heading_code(h)
 \end{lstlisting} to compute the index of a certain pose. For instance the pose $(0,1,EAST)$ would be translated to $1*4 + 1 = 5$, which corresponds to the robot pose shown in Figure \ref{fig:grid} and the pose $(0,0,EAST)$ would be equal to $1$. So to find the probability of going from pose (i.e. state) $(0,0,EAST)$ to $(0,1,EAST)$ we look up the transition matrix cell $\textbf{T}_{1, 5}$ which should be equal to $0.7$ according to Table \ref{tab:headings}.
 
-\textbf{TODO}: Explain the sensor matrix!
+The observation matrix is constructed as a diagonal matrix with the probabilities of the robot location on each diagonal element. In this project we receive only the robot location from the sensor, so where we have four states for each position in our transition matrix (as described above) we have four consecutive (along the diagonal) and equal probabilities for each position in the observation matrix.
+
 
 \section{Implementation}
-The program is written in Python3.
+The program is written in Python3 and the functionality is divided into different modules, located in the \texttt{robot\_localisation} package:
+\begin{itemize}
+    \item \texttt{grid.py}
+    \item \texttt{hmm\_filter.py}
+    \item \texttt{main.py}
+    \item \texttt{robot.py}
+\end{itemize}
+The \texttt{main} module is where the CLI is set up and where the robot simulation and tracking is initialised. This module also computes the error between the belief state and the actual state in the form of the so called Manhattan distance.
+
+The \texttt{robot} module contains the logic for the simulation of the robot movement as well as the \texttt{Sensor} class. The \texttt{Sensor} generates readings with the help of numpy according to the distribution explained in Section \ref{sec:robots}. The \texttt{Sensor} class is also responsible for generating the observation matrices depending on the current sensor reading. 
+
+The \texttt{hmm\_filter} module contains a class, \texttt{FilterState}, that does the filtering.
+In the \texttt{grid} module, the transition matrix is computed and the representation of the environment (i.e. the grid) is stored. 
 
 \subsection{Usage}
 The program root is to be found at \texttt{/h/d5/f/dat11al1/robot-localisation}, while standing in that directory, execute \texttt{python3 robot\_localisation -h} to get a useful help message as such:
@@ -154,22 +172,42 @@ The transition and observation matrices can at any time be displayed by invoking
 To quit, enter \texttt{q}.
 
 \subsection{Testing}
-There are three test modules; \texttt{grid\_test}, \texttt{manhattan\_text} and \texttt{robot\_test}, all located in the \texttt{tests} directory. To execute any of them, make sure the current working directory is the project root (\texttt{/h/d5/f/dat11al1/robot-localisation}) and type \texttt{python3 tests/<test-module>.py}.
+
+There are three test modules; \texttt{grid\_test}, \texttt{manhattan\_text} and \texttt{robot\_test}, all located in the \texttt{tests} directory. To execute any of them, go to the project root (\texttt{/h/d5/f/dat11al1/robot-localisation}) and type the command: \texttt{python3 tests/<test-module>.py}.
+ 
  
 \section{Results}
 
+Figures \ref{fig:manhattan-errors} and \ref{fig:manhattan-errors-single} show the errors (Manhattan distance from the true location to the inferred location) compared to the number of steps taken in the simulation, over an average of 20 simulations and for a single simulation respectively.
 
+\begin{figure}[h!]
+    \centering
+    \textbf{Manhattan distance between true position and \\ inferred position}
+    \includegraphics[scale=0.45]{manhattan-errors-notitle.png}
+    \caption{The average Manhattan distance between the true robot location and the assumed location using hidden Markov model filtering. The distances were taken over an average of 20 simulations.}
+    \label{fig:manhattan-errors}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \textbf{Manhattan distance between true position and \\ inferred position for a single simulation}
+    \includegraphics[scale=0.45]{manhattan-errors-single.png}
+    \caption{Manhattan distance between the true robot location and the assumed location using hidden Markov model filtering. This plot is for a single simulation and points at which the sensor returned no reading were recorded and plotted as dots in the figure.}
+    \label{fig:manhattan-errors-single}
+\end{figure}
+
+
+
+\FloatBarrier
 \section{Discussion}
-finally a discussion, in which the above question should be answered
-How accurately can you track the robot’s path with this approach?
 
-Hint: In terms of robot localisation it is often not relevant to know how often you are 100\% correct with your estimate, but rather, how far "off" your estimate is from reality on average / how often. You could measure the distance between true location and estimate by using the manhattan distance (how many robot steps off), or the direct euclidean distance (looks nicer, but would not help a robot that can only move straight too much). 
+We find that during the execution of our code the FilterState class finds the location of the robot at an error of 1-2 Manhattan distance within 1-2 steps. For continued execution of the code the belief state is rarely greater than 2 Manhattan distance away. Figure \ref{fig:manhattan-errors} exemplifies this, we see that over an average of 20 simulations for different grid sizes the error converges to a Manhattan distance of between 1-2 at greater than 2 steps.
 
+We also note that one of the primary causes of an incerasing error is when the sensor returns no value (shown in figure \ref{fig:manhattan-errors-single}). In our implementation we do not update our position for these cases, so this result is in line with intuition (only the robot position is changed, and unless it moves directly towards our estimated position the error will increase).
 
+When the sensor gives positions that are outside the grid, we still include them in the calculation. This is something we believe is better than treating off-grid positions as "None". If we treated them as "None", the sensor reading at that time would not give the model any useful information at all. While in our implementation, off-grid positions are not treated any differently than ordinary sensor readings. In the cases where the sensor reports the location as being two steps outside the grid, there could in fact sometimes only be one possible true location that could have caused that sensor reading.
+So even if the sensor reports a location that is guaranteed to be incorrect, it still gives the model useful information.
 
 \bibliographystyle{plain}
 \bibliography{references}
 \end{document}
-
-
-
